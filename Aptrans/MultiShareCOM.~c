@@ -1,0 +1,358 @@
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdarg.h>
+
+#include <ctosapi.h>
+
+#include <unistd.h>
+#include <pwd.h>
+#include <sys/types.h>
+
+#include <sys/stat.h>
+#include <sys/time.h>
+#include <sys/wait.h>
+#include <fcntl.h>
+#include <errno.h>
+#include <dirent.h>
+#include <signal.h>
+#include <pthread.h>
+#include <sys/shm.h>
+#include <linux/errno.h>
+#include <sys/types.h>
+#include <sys/ipc.h>
+#include <sys/msg.h>
+
+#include "..\ApTrans\MultiApTrans.h"
+#include "..\Database\DatabaseFunc.h"
+
+#include "..\Includes\POSTypedef.h"
+#include "..\Includes\Wub_lib.h"
+
+#include "..\Debug\Debug.h"
+
+#include "..\ApTrans\MultiShareCOM.h"
+
+
+int inCTOSS_COMM_Initialize(TRANS_DATA_TABLE *srTransPara,int inMode)
+{
+    BYTE bInBuf[40];
+    BYTE bOutBuf[40];
+    BYTE *ptr = NULL;
+    USHORT usInLen = 0;
+    USHORT usOutLen = 0;
+    USHORT usResult;
+
+    if(inMode == GPRS_MODE)
+        return d_OK;
+
+    memset(bOutBuf, 0x00, sizeof(bOutBuf)); 
+
+    inMultiAP_Database_COM_Clear();
+
+    strCOM.inCommMode = GPRS_MODE;//for test
+    
+    strCOM.inCommMode = ETHERNET_MODE;//for test
+    //strCOM.inCommMode = inMode;
+    inMultiAP_Database_COM_Save();
+    
+    usResult = inMultiAP_RunIPCCmdTypes("SHARLS_COM", d_IPC_CMD_COMM_INIT, bInBuf, usInLen, bOutBuf, &usOutLen);
+    if(d_OK == usResult)
+    {
+        //status
+        if(bOutBuf[0] == IPC_COMM_SUCC)            
+            return d_OK;
+        else
+            return d_NO;
+    }
+    
+    return usResult;
+}
+
+int inCTOSS_COMM_Connect(TRANS_DATA_TABLE *srTransPara)
+{
+    BYTE bInBuf[40];
+    BYTE bOutBuf[40];
+    BYTE *ptr = NULL;
+    USHORT usInLen = 0;
+    USHORT usOutLen = 0;
+    USHORT usResult;
+
+    memset(bOutBuf, 0x00, sizeof(bOutBuf));
+    inMultiAP_Database_COM_Clear();
+
+    if(srTransRec.byTransType != SETTLE)
+    {
+        strcpy(strCOM.szPriHostIP,strCPT.szPriTxnHostIP);
+        strcpy(strCOM.szSecHostIP,strCPT.szSecTxnHostIP);
+        strCOM.ulPriHostPort = strCPT.inPriTxnHostPortNum;
+        strCOM.ulSecHostPort = strCPT.inSecTxnHostPortNum;
+        vdDebug_LogPrintf("-inCTOSS_COMM_Connect[%s]port[%ld]",strCOM.szPriHostIP,strCOM.ulPriHostPort);
+    }
+    else
+    {
+        strcpy(strCOM.szPriHostIP,strCPT.szPriSettlementHostIP);
+        strcpy(strCOM.szSecHostIP,strCPT.szSecSettlementHostIP);
+        strCOM.ulPriHostPort = strCPT.inPriSettlementHostPort;
+        strCOM.ulSecHostPort = strCPT.inSecSettlementHostPort;
+        vdDebug_LogPrintf("--inCTOSS_COMM_Connect[%s]port[%ld]",strCOM.szPriHostIP,strCOM.ulPriHostPort);
+
+    }  
+    inMultiAP_Database_COM_Save();
+
+    usResult = inMultiAP_RunIPCCmdTypes("SHARLS_COM", d_IPC_CMD_COMM_CONNECT, bInBuf, usInLen, bOutBuf, &usOutLen);
+    if(d_OK == usResult)
+    {
+        //status
+        if(bOutBuf[0] == IPC_COMM_SUCC)            
+            return d_OK;
+        else
+            return d_NO;
+    }
+    
+    return usResult;
+}
+
+int inCTOSS_COMM_Send(TRANS_DATA_TABLE *srTransPara,unsigned char *uszSendData,unsigned long ulSendLen)
+{
+    BYTE bInBuf[40];
+    BYTE bOutBuf[40];
+    BYTE bySendTemp[2048];
+    BYTE byTempLen[10];
+    BYTE byTempHEXLen[10];
+    int inHeader;
+    
+    BYTE *ptr = NULL;
+    USHORT usInLen = 0;
+    USHORT usOutLen = 0;
+    USHORT usResult;
+
+    memset(bOutBuf, 0x00, sizeof(bOutBuf)); 
+
+    inMultiAP_Database_COM_Clear();
+
+    inHeader = strCPT.inIPHeader;
+    strCOM.bSSLFlag = strCPT.fSSLEnable;
+
+    //inHeader = HEX_EXCLUDE_LEN;//for test
+    vdDebug_LogPrintf("inCTOSS_COMM_Send[%ld]",ulSendLen);
+    
+    switch(inHeader)
+    {
+        case NO_HEADER_LEN:
+            strCOM.inSendLen = ulSendLen;
+            vdDebug_LogPrintf("---***inCTOSS_COMM_Send[%ld]",ulSendLen);
+            
+            memcpy(bySendTemp, uszSendData, ulSendLen);
+            memcpy(strCOM.szSendData,bySendTemp,strCOM.inSendLen);
+            break;
+            
+        case HEX_EXCLUDE_LEN:
+            bySendTemp[0] = ((ulSendLen & 0x0000FF00) >> 8);
+            bySendTemp[1] = (ulSendLen & 0x000000FF);
+
+            strCOM.inSendLen = ulSendLen + 2;
+            
+            vdDebug_LogPrintf("---inCTOSS_COMM_Send[%ld]",ulSendLen);
+            memcpy(&bySendTemp[2], uszSendData, ulSendLen);
+            memcpy(strCOM.szSendData,bySendTemp,strCOM.inSendLen);
+
+            break;
+
+        case BCD_EXCLUDE_LEN:
+            sprintf(byTempLen,"%04ld",ulSendLen);
+            wub_str_2_hex(byTempLen,byTempHEXLen,4);
+            memcpy(bySendTemp,byTempHEXLen,2);           
+            strCOM.inSendLen = ulSendLen + 2;
+            
+            memcpy(&bySendTemp[2], uszSendData, ulSendLen);
+            memcpy(strCOM.szSendData,bySendTemp,strCOM.inSendLen);
+            break;
+
+        case HEX_INCLUDE_LEN:
+            ulSendLen += 2;
+
+            bySendTemp[0] = ((ulSendLen & 0x0000FF00) >> 8);
+            bySendTemp[1] = (ulSendLen & 0x000000FF);
+
+            strCOM.inSendLen = ulSendLen + 2;
+            vdDebug_LogPrintf("---HEX_INCLUDE_LEN[%ld]",ulSendLen);
+            memcpy(&bySendTemp[2], uszSendData, ulSendLen);
+            memcpy(strCOM.szSendData,bySendTemp,strCOM.inSendLen);   
+            break;
+            
+
+        case BCD_INCLUDE_LEN:            
+            ulSendLen += 2;
+
+            sprintf(byTempLen,"%04ld",ulSendLen);
+            wub_str_2_hex(byTempLen,byTempHEXLen,4);
+            memcpy(bySendTemp,byTempHEXLen,2);           
+            strCOM.inSendLen = ulSendLen + 2;
+            
+            memcpy(&bySendTemp[2], uszSendData, ulSendLen);
+            memcpy(strCOM.szSendData,bySendTemp,strCOM.inSendLen);
+            
+            break;
+
+        default:
+            
+            bySendTemp[0] = ((ulSendLen & 0x0000FF00) >> 8);
+            bySendTemp[1] = (ulSendLen & 0x000000FF);
+
+            strCOM.inSendLen = ulSendLen + 2;
+            
+            vdDebug_LogPrintf("---inCTOSS_COMM_Send[%ld]",ulSendLen);
+            memcpy(&bySendTemp[2], uszSendData, ulSendLen);
+            memcpy(strCOM.szSendData,bySendTemp,strCOM.inSendLen);
+
+            break;
+    }
+    
+    //strCOM.inHeaderFormat = inHeader;
+    
+    inMultiAP_Database_COM_Save();
+
+    usResult = inMultiAP_RunIPCCmdTypes("SHARLS_COM", d_IPC_CMD_COMM_SEND, bInBuf, usInLen, bOutBuf, &usOutLen);
+    
+    vdDebug_LogPrintf("---inCTOSS_COMM_Send[%ld]",usResult);
+    if(d_OK == usResult)
+    {
+        //status
+        if(bOutBuf[0] == IPC_COMM_SUCC)            
+            return d_OK;
+        else
+            return d_NO;
+    }
+    else
+        return d_NO;
+    
+    //return usResult;
+}
+
+int inCTOSS_COMM_Receive(TRANS_DATA_TABLE *srTransPara,unsigned char *uszRecData)
+{
+    BYTE bInBuf[40];
+    BYTE bOutBuf[40];
+    BYTE *ptr = NULL;
+    USHORT usInLen = 0;
+    USHORT usOutLen = 0;
+    USHORT usResult;
+
+    memset(bOutBuf, 0x00, sizeof(bOutBuf));    
+    
+
+    usResult = inMultiAP_RunIPCCmdTypes("SHARLS_COM", d_IPC_CMD_COMM_RECEIVE, bInBuf, usInLen, bOutBuf, &usOutLen);
+    
+    vdDebug_LogPrintf("---inCTOSS_COMM_Receive.usResult[%d]bOutBuf[0]=[%d]",usResult,bOutBuf[0]);
+    if(d_OK == usResult)
+    {
+        //status
+        if(bOutBuf[0] == IPC_COMM_SUCC) 
+        {      
+            inMultiAP_Database_COM_Read();
+            vdDebug_LogPrintf("---strCOM.inReceiveLen[%d]",strCOM.inReceiveLen);
+            DebugAddHEX("rec data==",strCOM.szReceiveData,strCOM.inReceiveLen);
+            if(strCPT.inIPHeader == NO_HEADER_LEN)
+            {
+                usResult = strCOM.inReceiveLen;
+                memcpy(uszRecData,&strCOM.szReceiveData,strCOM.inReceiveLen);
+            }
+            else
+            {
+                usResult = strCOM.inReceiveLen-2;
+                memcpy(uszRecData,&strCOM.szReceiveData[2],strCOM.inReceiveLen-2);
+            }       
+            return usResult;
+        }
+        else
+            return 0;
+    }
+    
+    return usResult;
+}
+
+int inCTOSS_COMM_Disconnect(TRANS_DATA_TABLE *srTransPara)
+{
+    BYTE bInBuf[40];
+    BYTE bOutBuf[40];
+    BYTE *ptr = NULL;
+    USHORT usInLen = 0;
+    USHORT usOutLen = 0;
+    USHORT usResult;
+
+    memset(bOutBuf, 0x00, sizeof(bOutBuf)); 
+
+    usResult = inMultiAP_RunIPCCmdTypes("SHARLS_COM", d_IPC_CMD_COMM_DISCONNECT, bInBuf, usInLen, bOutBuf, &usOutLen);
+    if(d_OK == usResult)
+    {
+        //status
+        if(bOutBuf[0] == IPC_COMM_SUCC)            
+            return d_OK;
+        else
+            return d_NO;
+    }
+    
+    return usResult;
+}
+
+int inCTOSS_COMM_End(TRANS_DATA_TABLE *srTransPara)
+{
+    BYTE bInBuf[40];
+    BYTE bOutBuf[40];
+    BYTE *ptr = NULL;
+    USHORT usInLen = 0;
+    USHORT usOutLen = 0;
+    USHORT usResult;
+
+    memset(bOutBuf, 0x00, sizeof(bOutBuf)); 
+
+    usResult = inMultiAP_RunIPCCmdTypes("SHARLS_COM", d_IPC_CMD_COMM_END, bInBuf, usInLen, bOutBuf, &usOutLen);
+    if(d_OK == usResult)
+    {
+        //status
+        if(bOutBuf[0] == IPC_COMM_SUCC)            
+            return d_OK;
+        else
+            return d_NO;
+    }
+    
+    return usResult;
+}
+
+
+int inCTOSS_GetGPRSSignal(void)
+{
+    BYTE bInBuf[40];
+    BYTE bOutBuf[40];
+    BYTE *ptr = NULL;
+    USHORT usInLen = 0;
+    USHORT usOutLen = 0;
+    USHORT usResult;
+    int inSignal;
+
+    memset(bOutBuf, 0x00, sizeof(bOutBuf)); 
+
+    usResult = inMultiAP_RunIPCCmdTypes("SHARLS_COM", d_IPC_CMD_GPRS_SINGAL, bInBuf, usInLen, bOutBuf, &usOutLen);
+
+    inSignal = bOutBuf[1];
+
+    
+    vdDebug_LogPrintf("---inCTOSS_GetGPRSSignal[%02X %02X]", bOutBuf[0], bOutBuf[1]);
+    if(d_OK == usResult)
+    {
+        //status
+        if(bOutBuf[0] == IPC_COMM_SUCC)            
+            return inSignal;
+        else
+            return d_NO;
+    }
+    
+    return usResult;
+}
+
+
+
+
+
+
