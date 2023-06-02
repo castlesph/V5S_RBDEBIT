@@ -1,9 +1,0 @@
----- szDetailReportMask Matches (8 in 3 files) ----
-DatabaseFunc.c (c:\castles\bdo_version_11.1\v5s_bdodebit_clg\database):	char *sql = "SELECT inHostIndex, szHostLabel, szTPDU, szNII, fReversalEnable, fHostEnable, szTraceNo, fSignOn, ulLastTransSavedIndex, inCurrencyIdx, szAPName, inFailedREV, inDeleteREV, inNumAdv, fPrintFooterLogo, fPrintBankReceipt, fPrintCustReceipt, fPrintMercReceipt, fPrintVoidBankReceipt, fPrintVoidCustReceipt, fPrintVoidMercReceipt, fHDTTipAllow, fAutoDelReversal, inReversalTries, szDetailReportMask FROM HDT WHERE HDTid = ? AND fHostEnable = ?";
-DatabaseFunc.c (c:\castles\bdo_version_11.1\v5s_bdodebit_clg\database):		/* szDetailReportMask */
-DatabaseFunc.c (c:\castles\bdo_version_11.1\v5s_bdodebit_clg\database):		strcpy((char*)strHDT.szDetailReportMask, (char *)sqlite3_column_text(stmt, inStmtSeq +=1));
-DatabaseFunc.c (c:\castles\bdo_version_11.1\v5s_bdodebit_clg\database):	char *sql = "SELECT inHostIndex, szHostLabel, szTPDU, szNII, fReversalEnable, fHostEnable, szTraceNo, fSignOn, ulLastTransSavedIndex, inCurrencyIdx, szAPName, inFailedREV, inDeleteREV, inNumAdv, fPrintFooterLogo, fPrintBankReceipt, fPrintCustReceipt, fPrintMercReceipt, fPrintVoidBankReceipt, fPrintVoidCustReceipt, fPrintVoidMercReceipt, fHDTTipAllow, fAutoDelReversal, inReversalTries, szDetailReportMask FROM HDT WHERE HDTid = ? AND fHostEnable = ?";
-DatabaseFunc.c (c:\castles\bdo_version_11.1\v5s_bdodebit_clg\database):		/* szDetailReportMask */
-DatabaseFunc.c (c:\castles\bdo_version_11.1\v5s_bdodebit_clg\database):		strcpy((char*)strHDT.szDetailReportMask, (char *)sqlite3_column_text(stmt, inStmtSeq +=1));
-myFileFunc.h (c:\castles\bdo_version_11.1\v5s_bdodebit_clg\filemodule):	char szDetailReportMask[20];
-Print.c (c:\castles\bdo_version_11.1\v5s_bdodebit_clg\print):	vdCTOS_FormatPAN2(strHDT.szDetailReportMask, srTransRec.szPAN, szTempBuf1);
