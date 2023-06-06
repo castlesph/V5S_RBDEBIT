@@ -745,8 +745,8 @@ int inCTOS_CustComputeAndDispTotal(void)
 	sprintf(szStr1, "%s %s", strCST.szCurSymbol,szStr);
 
 	memset(szAmtMsg, 0x00, sizeof(szAmtMsg));
-	sprintf(szAmtMsg, "TOTAL AMOUNT\n%s", szStr1);
-	
+//	sprintf(szAmtMsg, "TOTAL AMOUNT\n%s", szStr1);
+	sprintf(szAmtMsg, "%s", szStr1);
 	//setLCDPrint(7, DISPLAY_POSITION_LEFT, szStr1);
 	//setLCDPrint(7, DISPLAY_POSITION_RIGHT, szStr);
 
@@ -1000,7 +1000,7 @@ int inCTOS_CustComputeAndDispTotal(void)
     {
         
     }
-	ret = usCTOSS_Confirm(szDisMsg);
+	ret = usCTOSS_Confirm("PLS ENTER TO PROCEED");
 //    ret = ConfirmCardDetails(szDisMsg);
 
     vdDebug_LogPrintf("ConfirmCardDetails szDisMsg[%s]", szDisMsg);

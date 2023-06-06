@@ -906,23 +906,23 @@ int InDisplayBalance(void)
 	BYTE szDisplayBuf[40];
     BYTE   key;
     
-    //CTOS_LCDTClearDisplay();
-    //vdDispTransTitle(srTransRec.byTransType);
-    //CTOS_LCDTPrintXY(1, 4, "BALANCE:");
+    CTOS_LCDTClearDisplay();
+    vdDispTransTitle(srTransRec.byTransType);
+    CTOS_LCDTPrintXY(1, 2, "AVAILABLE BALANCE:");
     
     wub_hex_2_str(srTransRec.szTotalAmount, szAmount, AMT_BCD_SIZE);  
 	vdDebug_LogPrintf("1.InDisplayBalance: %s", szAmount);
     memset(szStr, 0x00, sizeof(szStr));
     vdCTOS_FormatAmount("N,NNN,NNN,NNn.nn",szAmount, szStr);
 	vdDebug_LogPrintf("2.InDisplayBalance: %s", szStr);
-
+        
 	//0500 0001 2300
     //setLCDPrint(6, DISPLAY_POSITION_LEFT, strCST.szCurSymbol);
     //CTOS_LCDTPrintXY(MAX_CHAR_PER_LINE-(strlen(szStr)+1)*2,  6, szStr);
 
 	memset(szTemp, 0, sizeof(szTemp));
 	sprintf(szTemp, "%3s %s", strCST.szCurSymbol, szStr);
-   // setLCDPrint(6, DISPLAY_POSITION_RIGHT, szTemp);
+   setLCDPrint(3, DISPLAY_POSITION_LEFT, szTemp);
 
 
 	
@@ -941,20 +941,8 @@ int InDisplayBalance(void)
    //key = usCTOSS_ConfirmInvAndAmt(szDisplayBuf);
    //key = usCTOSS_Confirm(szDisplayBuf);
    //key = usCTOSS_ConfirmOK(szDisplayBuf);
-   key = inDisplayMessageBoxWithButton(1,8,"BALANCE INQUIRY","BALANCE:",szTemp, MSG_TYPE_LOGO); // sidumili: added
-   
-	   if(key == d_OK)
-	   {
-		   result=d_OK;
-	   }
-	   else if((key == d_USER_CANCEL))
-	   {
-		   result=d_NO;
-	   }
-	   if(key == 0xFF)
-	   {	  
-		   result=d_NO;
-	   }
+//   key = inDisplayMessageBoxWithButton(1,8,"BALANCE INQUIRY","BALANCE:",szTemp, MSG_TYPE_LOGO); // sidumili: added
+   key = usCTOSS_Confirm("PRESS ANY KEY EXIT");
 
 	    vdRemoveCard();
 

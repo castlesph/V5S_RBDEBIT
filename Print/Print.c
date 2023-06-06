@@ -1748,158 +1748,64 @@ return d_OK;
 }
 
 
-#if 0
+#if 1
 
-USHORT ushCTOS_printAll(int page) {
-    int inResult;
-    BYTE szMsg[256];
-    BYTE szPrintMsg[512];
-    BYTE szTitle[20 + 1];
-    BYTE szDisMsg[100];
-    int inKey = d_NO;
-    BYTE szLogoPath[256 + 1];
+USHORT ushCTOS_printAll(int page) {	
+	int inResult;
 
-
-    vdDebug_LogPrintf("--ushCTOS_printAll--");
-    //vdDebug_LogPrintf("fERMTransaction[%d]", fERMTransaction);
-
-    if (printCheckPaper() == -1)
+	vdDebug_LogPrintf("--ushCTOS_printAll--");
+	//vdDebug_LogPrintf("fERMTransaction[%d]", fERMTransaction);
+	
+    if( printCheckPaper()==-1)
         return -1;
 
-    //if (isCheckTerminalMP200() != d_OK)
-    //	 vdDisplayAnimateBmp(0,0, "Print1.bmp", "Print2.bmp", "Print3.bmp", NULL, NULL);
+	//if (isCheckTerminalMP200() != d_OK)
+   	//	 vdDisplayAnimateBmp(0,0, "Print1.bmp", "Print2.bmp", "Print3.bmp", NULL, NULL);
 
-#if 0 /*albert (ecr tct update fail) - save last invoice number, moved to vdSaveLastInvoiceNo*/
+    #if 0 /*albert (ecr tct update fail) - save last invoice number, moved to vdSaveLastInvoiceNo*/
     if(VS_FALSE == fRePrintFlag)
-        memcpy(strTCT.szLastInvoiceNo,srTransRec.szInvoiceNo,INVOICE_BCD_SIZE);
-
-    if((inResult = inTCTSave(1)) != ST_SUCCESS)
+	    memcpy(strTCT.szLastInvoiceNo,srTransRec.szInvoiceNo,INVOICE_BCD_SIZE);
+	
+	if((inResult = inTCTSave(1)) != ST_SUCCESS)
     {
-        vdDisplayErrorMsg(1, 8, "Update TCT fail");
+		vdDisplayErrorMsg(1, 8, "Update TCT fail");
     }
-#endif
+	#endif
 
-    //if (isCheckTerminalMP200() != d_OK)
-    //	vdCTOSS_PrinterStart(100);
-
+    if (isCheckTerminalMP200() != d_OK)
+		vdCTOSS_PrinterStart(100);
+	
     //CTOS_PrinterSetHeatLevel(4);  
 
-    vdDebug_LogPrintf("ushCTOS_printAll-2");
-
-    inCTOS_SelectFont(d_FONT_FNT_MODE, d_FONT_24x24, 0, " ");
+	vdDebug_LogPrintf("ushCTOS_printAll-2");
+	
+    inCTOS_SelectFont(d_FONT_FNT_MODE,d_FONT_24x24,0," ");
     vdSetGolbFontAttrib(d_FONT_24x24, NORMAL_SIZE, NORMAL_SIZE, 0, 0);
+    
+	ushCTOS_PrintHeader(page);
 
-    ushCTOS_PrintHeader(page);
+	vdDebug_LogPrintf("ushCTOS_printAll-3");
 
-    vdDebug_LogPrintf("ushCTOS_printAll-3");
-
-    if (srTransRec.fLoyalty == TRUE &&
-        (srTransRec.byTransType == LOY_BAL_INQ || srTransRec.byTransType == LOY_REDEEM_5050
-         || srTransRec.byTransType == LOY_REDEEM_VARIABLE || srTransRec.byTransType == VOID)) {
-        ushCTOS_PrintLoyaltyBody(page);
-        ushCTOS_PrintLoyaltyFooter(page);
-    } else {
-        ushCTOS_PrintBody(page);
-        ushCTOS_PrintFooter(page);
-    }
-
-    //vdCTOSS_PrinterEnd();
+	if(srTransRec.fLoyalty==TRUE && (srTransRec.byTransType == LOY_BAL_INQ || srTransRec.byTransType == LOY_REDEEM_5050
+	|| srTransRec.byTransType == LOY_REDEEM_VARIABLE || srTransRec.byTransType == VOID))
+	{
+ 	    ushCTOS_PrintLoyaltyBody(page);	
+	    ushCTOS_PrintLoyaltyFooter(page);
+	}
+	else
+	{	
+  	    ushCTOS_PrintBody(page);	
+	    ushCTOS_PrintFooter(page);
+	}
+	
+	//vdCTOSS_PrinterEnd();
     //vdSetPrintThreadStatus(0);
 
-    //TINE:  19AUG2019 modified for android terminal to display receipt on screen
-    memset(szMsg, 0x00, sizeof(szMsg));
-    memset(szLogoPath, 0x00, sizeof(szLogoPath));
-    memset(szPrintMsg, 0x00, sizeof(szPrintMsg));
-
-    sprintf(szLogoPath, "%s%s", LOCAL_PATH, "bancnet.bmp");
-
-
-    if (page == BANK_COPY_RECEIPT)
-        strcpy(szMsg, "Print Bank Copy?");
-    else if (page == CUSTOMER_COPY_RECEIPT)
-        strcpy(szMsg, "Print Customer Copy?");
-    else if (page == MERCHANT_COPY_RECEIPT)
-        strcpy(szMsg, "Print Merchant Copy?");
-
-    vdCTOSS_PrinterEnd_CConvert2BMP("/home/ap/pub/Print_BMP.bmp");
-    CTOS_KBDBufFlush();
-
-    //if (isCheckTerminalMP200() != d_OK)
-    //    CTOS_LCDTClearDisplay();
-    strTCT.feReceiptEnable= 1;
-    if (strTCT.feReceiptEnable == 1) {
-
-        strcpy(szPrintMsg, szLogoPath);
-        strcat(szPrintMsg, "|");
-        strcat(szPrintMsg, szMsg);
-
-        if (strTCT.byTerminalModel == 1) {
-
-            if (printcopies_cntr == 0) {
-                //inKey = PrintFirstReceiptUI(szLogoPath);
-                memset(szTitle, 0x00, sizeof(szTitle));
-                szGetTransTitle(srTransRec.byTransType, szTitle);
-                strcpy(szDisMsg, szTitle);
-                strcat(szDisMsg, "|");
-                strcat(szDisMsg, "PRINTING...");
-                usCTOSS_LCDDisplay(szDisMsg);
-
-                vdCTOSS_PrinterBMPPicEx(0, 0, szLogoPath);
-                vdCTOSS_PrinterBMPPicEx(0, 0, "/home/ap/pub/Print_BMP.bmp");
-                vdCTOSS_PrinterEnd();
-                return d_OK;
-            } else {
-                inKey = PrintReceiptUI(szPrintMsg);
-
-                if (inKey == d_OK || inKey == 0xFF) {
-                    vdDebug_LogPrintf("vdCTOSS_PrinterEnd() - START");
-                    memset(szTitle, 0x00, sizeof(szTitle));
-                    szGetTransTitle(srTransRec.byTransType, szTitle);
-                    strcpy(szDisMsg, szTitle);
-                    strcat(szDisMsg, "|");
-                    strcat(szDisMsg, "PRINTING...");
-                    usCTOSS_LCDDisplay(szDisMsg);
-
-                    vdCTOSS_PrinterBMPPicEx(0, 0, szLogoPath);
-                    vdCTOSS_PrinterBMPPicEx(0, 0, "/home/ap/pub/Print_BMP.bmp");
-                    vdCTOSS_PrinterEnd();
-                    return d_OK;
-                    //print_counter = 1;
-                    //goto INPRINTRECEIPT;
-                }
-                if (inKey == d_USER_CANCEL) {
-                    return d_OK;
-                }
-
-            }
-
-        } else {
-            vdDebug_LogPrintf("strTCT.byTerminalModel = [%d]", strTCT.byTerminalModel);
-            inKey = EliteReceiptUI(szLogoPath);
-        }
-    } else {
-        //sprintf(szLogoPath, "%s%s", LOCAL_PATH, strHDT.szHeaderLogoName);
-        memset(szTitle, 0x00, sizeof(szTitle));
-        szGetTransTitle(srTransRec.byTransType, szTitle);
-        strcpy(szDisMsg, szTitle);
-        strcat(szDisMsg, "|");
-        strcat(szDisMsg, "PRINTING...");
-        usCTOSS_LCDDisplay(szDisMsg);
-
-        vdCTOSS_PrinterBMPPicEx(0, 0, szLogoPath);
-        vdCTOSS_PrinterBMPPicEx(0, 0, "/data/data/pub/Print_BMP.bmp");
-        vdCTOSS_PrinterEnd();
-        //vdSetPrintThreadStatus(0);
-
-        //if (isCheckTerminalMP200() != d_OK)
-        //    CTOS_LCDTClearDisplay();
-
-        return d_OK;
-
-    }
-
-    return inKey;
-
+	if (isCheckTerminalMP200() != d_OK)
+	    CTOS_LCDTClearDisplay();  
+    
+    return d_OK;
+ 
 }
 #else
 USHORT ushCTOS_printAll(int page)
@@ -1913,7 +1819,7 @@ USHORT ushCTOS_printAll(int page)
 	BYTE szDisMsg[100];
 	BYTE szCopy[256];
 
-	vdDebug_LogPrintf("--ushCTOS_printAll--");
+	vdDebug_LogPrintf("--ushCTOS_printAll,page[%d]--", page);
 	//vdDebug_LogPrintf("fERMTransaction[%d]", fERMTransaction);
 	
     if( printCheckPaper()==-1)
@@ -1996,7 +1902,7 @@ USHORT ushCTOS_printAll(int page)
         CTOS_KBDBufFlush();
         inCTOSS_ERM_Form_Receipt(0);
 
-
+vdDebug_LogPrintf("strTCT.feReceiptEnable=%d, byTerminalModel[%d],printcopies_cntr=%d", strTCT.feReceiptEnable, strTCT.byTerminalModel, printcopies_cntr);
 	if (strTCT.feReceiptEnable == 1) {
 
         strcpy(szPrintMsg, szLogoPath);
@@ -2023,8 +1929,9 @@ USHORT ushCTOS_printAll(int page)
                 return d_OK;
             } else {
             	inKey = PrintReceiptUI(szPrintMsg);
-				
-				if (inKey == d_OK || inKey == 0xFF) {
+			vdDebug_LogPrintf("PrintReceiptUI() - inKey=%d", inKey);	
+				if (inKey == d_OK || inKey == 0xFF) 
+                                {
 	                vdDebug_LogPrintf("vdCTOSS_PrinterEnd() - START");
 					memset(szTitle, 0x00, sizeof(szTitle));
 					szGetTransTitle(srTransRec.byTransType, szTitle);
@@ -2677,7 +2584,7 @@ USHORT ushCTOS_printReceipt(void)
     USHORT result;
     BYTE   key;
     BOOL   needSecond = TRUE;
-    
+    vdDebug_LogPrintf("ushCTOS_printReceipt starttt...");
     if( printCheckPaper()==-1)
     	return -1;
 	
@@ -2686,7 +2593,7 @@ USHORT ushCTOS_printReceipt(void)
 		vdCTOSS_PrinterStart(100);
 
 	vdCTOS_PrintReceiptCopies(strTCT.fPrintBankCopy, TRUE, strTCT.fPrintMerchCopy);
-	
+	vdDebug_LogPrintf("ushCTOS_printReceipt enddd...");
     return (d_OK);
 }
 
@@ -4794,18 +4701,18 @@ void vdCTOS_PrintReceiptCopies(BOOL BankCopy, BOOL CustCopy, BOOL MercCopy)
 
 	if (isCheckTerminalMP200() != d_OK && fOrientation == TRUE)
 	{
-		//vdCTOS_DispStatusMessage("PROCESSING...");
-		vdDisplayMessageStatusBox(1, 8, "PROCESSING", MSG_PLS_WAIT, MSG_TYPE_PROCESS);
+		vdCTOS_DispStatusMessage("PROCESSING...");
+//		vdDisplayMessageStatusBox(1, 8, "PROCESSING", MSG_PLS_WAIT, MSG_TYPE_PROCESS);
 		
 		fERMTransaction = TRUE;
 		vdCTOSS_PrinterStart(500);
 		ushCTOS_printAll(BANK_COPY_RECEIPT);
 		vdCTOSS_PrinterEnd_CConvert2BMP("/home/ap/pub/Print_BMP.bmp");
-    	CTOS_KBDBufFlush();
+                CTOS_KBDBufFlush();
 		inCTOSS_ERM_Form_Receipt(0);
 	}	
 	//else
-	{
+{
 	    do
 		    {
 		        chPrintOption=(unsigned char)szPrintOption[inReceiptCtr];
@@ -4813,160 +4720,115 @@ void vdCTOS_PrintReceiptCopies(BOOL BankCopy, BOOL CustCopy, BOOL MercCopy)
 		        {
 					if(fFirstReceipt == TRUE)
 					{
-					    vdDebug_LogPrintf("saturn print bank");
 						ushCTOS_printAll(BANK_COPY_RECEIPT);
 						CTOS_KBDBufFlush();	
 						fFirstReceipt=FALSE;
-						//if(strTCT.fPrintReceipt == TRUE)
-						//{
-						//	inCTOS_DisplayPrintBMP();
-						//	vdCTOSS_PrinterEnd();
-						//}
-						CTOS_Delay(1000);
+						if(strTCT.fPrintReceipt == TRUE)
+						{
+							inCTOS_DisplayPrintBMP();
+							vdCTOSS_PrinterEnd();
+						}
 					}
 					else
 					{
 						CTOS_TimeOutSet(TIMER_ID_1, UI_TIMEOUT);  
 						//clearLine(7);
-						vdDebug_LogPrintf("saturn print bank copy");
-						//memset(szPrintDisplay,0x00,sizeof(szPrintDisplay));
-						//strcpy(szPrintDisplay, szTitle);
-						//strcat(szPrintDisplay, "|");
-						//strcat(szPrintDisplay, "PRINT BANK COPY?");
-						//inKey=usCTOSS_Confirm(szPrintDisplay);
-						
-		                while(1) {
-                            if (strTCT.fPrintReceipt != TRUE)
-                                break;
-
-                            //if (strTCT.fPrintWarningSound == TRUE)
-                            //vduiWarningSound();
-
-                            //CTOS_KBDHit(&key);
-
-                            if (strTCT.feReceiptEnable == 0) {
-                                memset(szPrintDisplay, 0x00, sizeof(szPrintDisplay));
-                                strcat(szPrintDisplay, "BANK COPY");
-
-                                fNextCopy = usCTOSS_Confirm(szPrintDisplay);
-                                vdDebug_LogPrintf("next copy %d", fNextCopy);
-
-                                vduiWarningSound();
-
-                                //if(inKey == d_OK)
-                                if (fNextCopy == d_OK) {
-                                    ushCTOS_printAll(BANK_COPY_RECEIPT);
-                                    CTOS_KBDBufFlush();//cleare key buffer
-                                    //if(strTCT.fPrintReceipt == TRUE)
-                                    //{
-                                    //    inCTOS_DisplayPrintBMP();
-                                    //    vdCTOSS_PrinterEnd();
-                                    //}
-                                    CTOS_Delay(1000);
-                                    break;
-                                } else if ((fNextCopy == d_USER_CANCEL)) {
-                                    //CTOS_LCDTClearDisplay();
-                                    break;
-                                }
-                                if (CTOS_TimeOutCheck(TIMER_ID_1) == d_YES) {
-                                    ushCTOS_printAll(BANK_COPY_RECEIPT);
-                                    //if(strTCT.fPrintReceipt == TRUE)
-                                    //{
-                                    //	inCTOS_DisplayPrintBMP();
-                                    //	vdCTOSS_PrinterEnd();
-                                    //}
-									CTOS_Delay(1000);
-                                    break;
-                                }
-                            } else {
-                                ushCTOS_printAll(BANK_COPY_RECEIPT);
-                                CTOS_KBDBufFlush();
-								CTOS_Delay(1000);
-                                break;
-                            }
-                        }
+						CTOS_LCDTClearDisplay();
+						setLCDPrint(7, DISPLAY_POSITION_CENTER, "PRINT BANK COPY?");
+						setLCDPrint(8, DISPLAY_POSITION_CENTER, "NO[X] YES[OK]");
+		                while(1)
+		                { 
+		                	if(strTCT.fPrintReceipt != TRUE)
+	                        break;
+							
+		                    //if (strTCT.fPrintWarningSound == TRUE)
+		                    vduiWarningSound();
+		                    
+		                    CTOS_KBDHit(&key);
+		                    if(key == d_KBD_ENTER)
+		                    {
+		                        ushCTOS_printAll(BANK_COPY_RECEIPT);
+		                        CTOS_KBDBufFlush();//cleare key buffer
+		                        if(strTCT.fPrintReceipt == TRUE)
+		                        {
+		                            inCTOS_DisplayPrintBMP();
+		                            vdCTOSS_PrinterEnd();
+		                        }
+		                        break;
+		                    }
+		                    else if((key == d_KBD_CANCEL))
+		                    {
+		                        CTOS_LCDTClearDisplay();
+		                        break;
+		                    }
+		                    if(CTOS_TimeOutCheck(TIMER_ID_1) == d_YES)
+		                    {
+								ushCTOS_printAll(BANK_COPY_RECEIPT);
+								if(strTCT.fPrintReceipt == TRUE)
+		                        {
+		                            inCTOS_DisplayPrintBMP();
+		                            vdCTOSS_PrinterEnd();
+		                        }
+		                        break;
+		                    }
+		                }
 					}
 		        }
 		        else if((chPrintOption == '2') && (CustCopy == TRUE)) /*customer copy*/
 		        {
 					if(fFirstReceipt == TRUE)
 					{
-                        printcopies_cntr = 0;
-					    ushCTOS_printAll(CUSTOMER_COPY_RECEIPT);
+						ushCTOS_printAll(CUSTOMER_COPY_RECEIPT);
 						CTOS_KBDBufFlush();//cleare key buffer	
 						fFirstReceipt=FALSE;
-						CTOS_Delay(1000);
-						//if(strTCT.fPrintReceipt == TRUE)
-						//{
-						//	inCTOS_DisplayPrintBMP();
-						//	vdCTOSS_PrinterEnd();
-						//}
+						if(strTCT.fPrintReceipt == TRUE)
+						{
+							inCTOS_DisplayPrintBMP();
+							vdCTOSS_PrinterEnd();
+						}
 					}
 					else
 					{
 						CTOS_TimeOutSet(TIMER_ID_1, UI_TIMEOUT);  
-						vdDebug_LogPrintf("saturn print customer");
-						//memset(szPrintDisplay,0x00,sizeof(szPrintDisplay));
-						//strcpy(szPrintDisplay, szTitle);
-						//strcat(szPrintDisplay, "|");
-						//strcat(szPrintDisplay, "PRINT CUSTOMER COPY?");
-						//inKey=usCTOSS_Confirm(szPrintDisplay);
-						
+						//clearLine(7);
+						CTOS_LCDTClearDisplay();
+						setLCDPrint(7, DISPLAY_POSITION_CENTER, "PRINT CUSTOMER COPY?");
+						setLCDPrint(8, DISPLAY_POSITION_CENTER, "NO[X] YES[OK]");
 		                while(1)
 		                { 
 		                	if(strTCT.fPrintReceipt != TRUE)
-	                        break;
-
-                            if(strTCT.feReceiptEnable == 0)
-                            {
-                                memset(szPrintDisplay,0x00,sizeof(szPrintDisplay));
-                                strcat(szPrintDisplay, "CUSTOMER COPY");
-
-                                fNextCopy = usCTOSS_Confirm(szPrintDisplay);
-
-                                //if (strTCT.fPrintWarningSound == TRUE)
-                                vduiWarningSound();
-
-                                ///CTOS_KBDHit(&key);
-                                //if(inKey == d_OK)
-                                if(fNextCopy == d_OK)
-                                {
-                                    ushCTOS_printAll(CUSTOMER_COPY_RECEIPT);
-                                    CTOS_KBDBufFlush();//cleare key buffer
-                                    CTOS_Delay(1000);
-                                    //if(strTCT.fPrintReceipt == TRUE)
-                                    //{
-                                    //    inCTOS_DisplayPrintBMP();
-                                    //    vdCTOSS_PrinterEnd();
-                                    //}
-                                    break;
-                                }
-                                else if((fNextCopy == d_USER_CANCEL))
-                                {
-                                    //CTOS_LCDTClearDisplay();
-                                    break;
-                                }
-                                if(CTOS_TimeOutCheck(TIMER_ID_1) == d_YES)
-                                {
-                                    ushCTOS_printAll(CUSTOMER_COPY_RECEIPT);
-									CTOS_Delay(1000);
-                                    //if(strTCT.fPrintReceipt == TRUE)
-                                    //{
-                                    //    inCTOS_DisplayPrintBMP();
-                                    //    vdCTOSS_PrinterEnd();
-                                    //}
-
-                                    break;
-                                }
-                            }
-                            else
-                            {
-                                ushCTOS_printAll(CUSTOMER_COPY_RECEIPT);
-                                CTOS_KBDBufFlush();//cleare key buffer
-                                break;
-                            }
-
+	                        break;	
 							
+		                    //if (strTCT.fPrintWarningSound == TRUE)
+		                    vduiWarningSound();
+		                    
+		                    CTOS_KBDHit(&key);
+		                    if(key == d_KBD_ENTER)
+		                    {
+		                        ushCTOS_printAll(CUSTOMER_COPY_RECEIPT);
+		                        CTOS_KBDBufFlush();//cleare key buffer
+		                        if(strTCT.fPrintReceipt == TRUE)
+		                        {
+		                            inCTOS_DisplayPrintBMP();
+		                            vdCTOSS_PrinterEnd();
+		                        }
+		                        break;
+		                    }
+		                    else if((key == d_KBD_CANCEL))
+		                    {
+		                        CTOS_LCDTClearDisplay();
+		                        break;
+		                    }
+		                    if(CTOS_TimeOutCheck(TIMER_ID_1) == d_YES)
+		                    {
+								ushCTOS_printAll(CUSTOMER_COPY_RECEIPT);
+								if(strTCT.fPrintReceipt == TRUE)
+		                        {
+		                            inCTOS_DisplayPrintBMP();
+		                            vdCTOSS_PrinterEnd();
+		                        }
+		                        break;
+		                    }
 		                }
 					}
 					
@@ -4978,77 +4840,58 @@ void vdCTOS_PrintReceiptCopies(BOOL BankCopy, BOOL CustCopy, BOOL MercCopy)
 						ushCTOS_printAll(MERCHANT_COPY_RECEIPT);
 						CTOS_KBDBufFlush();//cleare key buffer	
 						fFirstReceipt=FALSE;
-						CTOS_Delay(1000);
-						//if(strTCT.fPrintReceipt == TRUE)
-						// {
-                       //     inCTOS_DisplayPrintBMP();
-                       //     vdCTOSS_PrinterEnd();
-                       //}
+						if(strTCT.fPrintReceipt == TRUE)
+                        {
+                            inCTOS_DisplayPrintBMP();
+                            vdCTOSS_PrinterEnd();
+                        }
 					}
 					else
 					{
-					  	CTOS_TimeOutSet(TIMER_ID_1, UI_TIMEOUT);  
-					    vdDebug_LogPrintf("saturn print merchant copy");
-						//memset(szPrintDisplay,0x00,sizeof(szPrintDisplay));
-						//strcpy(szPrintDisplay, szTitle);
-						//strcat(szPrintDisplay, "|");
-						//strcat(szPrintDisplay, "PRINT MERCHANT COPY?");
-						//vdDebug_LogPrintf("before user confirm");
-						//inKey=usCTOSS_Confirm(szPrintDisplay);
-						//vdDebug_LogPrintf("saturn szPrintDisplay %s",szPrintDisplay);
-						//vdDebug_LogPrintf("saturn print merchant copy %d", inKey);
-						
+						CTOS_TimeOutSet(TIMER_ID_1, UI_TIMEOUT);  
+						//clearLine(7);				
+						CTOS_LCDTClearDisplay();
+						setLCDPrint(7, DISPLAY_POSITION_CENTER, "PRINT MERCHANT COPY?");
+						setLCDPrint(8, DISPLAY_POSITION_CENTER, "NO[X] YES[OK]");
 		                while(1)
 		                { 
 		                	if(strTCT.fPrintReceipt != TRUE)
-	                        break;
-
-                            if(strTCT.feReceiptEnable == 0)
-                            {
-                                memset(szPrintDisplay,0x00,sizeof(szPrintDisplay));
-                                strcat(szPrintDisplay, "MERCHANT COPY");
-                                fNextCopy = usCTOSS_Confirm(szPrintDisplay);
-                                //if (strTCT.fPrintWarningSound == TRUE) /*BDO PHASE 2: [Warning sound for printing flag] -- sidumili*/
-                                vduiWarningSound();
-
-                                //CTOS_KBDHit(&key);
-                                if (fNextCopy == d_OK) {
-                                    ushCTOS_printAll(MERCHANT_COPY_RECEIPT);
-                                    CTOS_KBDBufFlush();//cleare key buffer
-                                    //if (strTCT.fPrintReceipt == TRUE) {
-                                    //    inCTOS_DisplayPrintBMP();
-                                    //    vdCTOSS_PrinterEnd();
-                                    //}
-                                    CTOS_Delay(1000);
-                                    break;
-                                } else if ((fNextCopy == d_USER_CANCEL)) {
-                                    //CTOS_LCDTClearDisplay();
-                                    break;
-                                }
-                                if (CTOS_TimeOutCheck(TIMER_ID_1) == d_YES) {
-                                    ushCTOS_printAll(MERCHANT_COPY_RECEIPT);
-									CTOS_Delay(1000);
-                                    //if (strTCT.fPrintReceipt == TRUE) {
-                                    //    inCTOS_DisplayPrintBMP();
-                                    //    vdCTOSS_PrinterEnd();
-                                    //}
-
-                                    break;
-                                }
-                            }
-                            else
-                            {
-                                ushCTOS_printAll(MERCHANT_COPY_RECEIPT);
-                                CTOS_KBDBufFlush();//cleare key buffer
-                                CTOS_Delay(1000);
-                                break;
-                            }
+	                        break;	
+							
+		                    //if (strTCT.fPrintWarningSound == TRUE) /*BDO PHASE 2: [Warning sound for printing flag] -- sidumili*/
+		                    vduiWarningSound();
+		                    
+		                    CTOS_KBDHit(&key);
+		                    if(key == d_KBD_ENTER)
+		                    {
+		                        ushCTOS_printAll(MERCHANT_COPY_RECEIPT);
+		                        CTOS_KBDBufFlush();//cleare key buffer
+		                        if(strTCT.fPrintReceipt == TRUE)
+		                        {
+		                            inCTOS_DisplayPrintBMP();
+		                            vdCTOSS_PrinterEnd();
+		                        }
+		                        break;
+		                    }
+		                    else if((key == d_KBD_CANCEL))
+		                    {
+		                        CTOS_LCDTClearDisplay();
+		                        break;
+		                    }
+		                    if(CTOS_TimeOutCheck(TIMER_ID_1) == d_YES)
+		                    {
+								ushCTOS_printAll(MERCHANT_COPY_RECEIPT);
+								if(strTCT.fPrintReceipt == TRUE)
+		                        {
+		                            inCTOS_DisplayPrintBMP();
+		                            vdCTOSS_PrinterEnd();
+		                        }
+		                        break;
+		                    }
 		                }
 					}
-		        }
-                usCTOSS_LCDDisplay(" ");
-		        inReceiptCtr++;
-                printcopies_cntr = inReceiptCtr;
+		        }  		
+				inReceiptCtr++; 
 		    }while(inReceiptCtr < 3);
 	}
     if (isCashOutFlag)

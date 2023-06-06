@@ -666,7 +666,11 @@ void vduiPowerOff(void)
 
 void vduiDisplayStringCenter(unsigned char  y,unsigned char *sBuf)
 {
-    setLCDPrint27(y, DISPLAY_POSITION_CENTER, sBuf);
+//CTOS_LCDTPrintXY(1,y,"                ");
+//CTOS_LCDTPrintXY(1,y,"                          ");
+//CTOS_LCDTPrintXY((20-strlen(sBuf))/2+1,y,sBuf);
+    CTOS_LCDTPrintAligned(y,"                          ", d_LCD_ALIGNLEFT);	  
+    CTOS_LCDTPrintAligned(y,sBuf, d_LCD_ALIGNCENTER);     
 }
 
 void vduiClearBelow(int line)
@@ -1153,7 +1157,8 @@ USHORT usCTOSS_Confirm(BYTE *szDispString)
     BYTE key;
     int result = 0;
     CTOS_KBDBufFlush(); //cleare key buffer
-    
+    vdDebug_LogPrintf("usCTOSS_Confirm -- szDisMsg[%s],",szDispString);
+    CTOS_LCDTPrintXY(1, 4, szDispString);
     CTOS_TimeOutSet (TIMER_ID_2 , 45*100);
     while (1) {
 

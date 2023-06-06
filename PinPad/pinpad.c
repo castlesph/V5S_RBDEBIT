@@ -189,10 +189,10 @@ int inGetIPPPin(void)
   
 	
 	if(srTransRec.byTransType != BAL_INQ)
-	    inCTOS_DisplayCurrencyAmount(srTransRec.szTotalAmount, 5);
+	    inCTOS_DisplayCurrencyAmount(srTransRec.szTotalAmount, 3);
 	    
-	setLCDPrint(4, DISPLAY_POSITION_LEFT, strDCT.szDisplayLine1);
-	setLCDPrint(5, DISPLAY_POSITION_LEFT, strDCT.szDisplayLine2);
+	setLCDPrint(4, DISPLAY_POSITION_CENTER, strDCT.szDisplayLine1);
+	setLCDPrint(5, DISPLAY_POSITION_CENTER, strDCT.szDisplayLine2);
 	
 //	setLCDPrint(7, DISPLAY_POSITION_CENTER, strDCT.szDisplayLine1);
 //	setLCDPrint(8, DISPLAY_POSITION_CENTER, strDCT.szDisplayLine2);
@@ -222,7 +222,7 @@ int inGetIPPPin(void)
 	//CTOS_LCDSelectModeEx(d_LCD_TEXT_320x240_MODE, FALSE); // Fix for undisplay of * during pin -- sidumili	
 	ret = CTOS_KMS2PINGet((CTOS_KMS2PINGET_PARA *)&stPinGetPara);
 	
-        vdDebug_LogPrintf("**Online PIN[%d]*PINBlock[%s]*",ret,stPinGetPara.PINOutput.pEncryptedBlock);
+        vdDebug_LogPrintf("**-Online PIN[%d]*PINBlock[%s]*",ret,stPinGetPara.PINOutput.pEncryptedBlock);
     
         DebugAddHEX("szPINBlock=",stPinGetPara.PINOutput.pEncryptedBlock,8);
 	//aaronnino BANCNET bancnet fix on issue #0006 Unexpected "InProcessing=290F" appears in canceling Pin number start
