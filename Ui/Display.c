@@ -1158,12 +1158,12 @@ USHORT usCTOSS_Confirm(BYTE *szDispString)
     int result = 0;
     CTOS_KBDBufFlush(); //cleare key buffer
     vdDebug_LogPrintf("usCTOSS_Confirm -- szDisMsg[%s],",szDispString);
-    CTOS_LCDTPrintXY(1, 4, szDispString);
-    CTOS_TimeOutSet (TIMER_ID_2 , 45*100);
+    CTOS_LCDTPrintXY(1, 8, szDispString);
+    CTOS_TimeOutSet (TIMER_ID_1 , 45*100);
     while (1) {
 
         CTOS_KBDHit(&key);
-        vdDebug_LogPrintf("key=%d", key);
+//        vdDebug_LogPrintf("key=%d", key);
         if (key == d_KBD_ENTER) {
 			vduiClearBelow(7);
             result = d_OK;
@@ -1174,8 +1174,12 @@ USHORT usCTOSS_Confirm(BYTE *szDispString)
             break;
         }
         
-        if(CTOS_TimeOutCheck(TIMER_ID_2 )  == d_OK)
+        if(CTOS_TimeOutCheck(TIMER_ID_1 )  == d_YES)
+        {
+            vdSetErrorMessage("TIME OUT");
             return  d_NO;
+        }
+            
     }
     
     CTOS_KBDBufFlush ();

@@ -746,7 +746,7 @@ int inCTOS_CustComputeAndDispTotal(void)
 
 	memset(szAmtMsg, 0x00, sizeof(szAmtMsg));
 //	sprintf(szAmtMsg, "TOTAL AMOUNT\n%s", szStr1);
-	sprintf(szAmtMsg, "%s", szStr1);
+	sprintf(szAmtMsg, "TOT AMT:%s", szStr1);
 	//setLCDPrint(7, DISPLAY_POSITION_LEFT, szStr1);
 	//setLCDPrint(7, DISPLAY_POSITION_RIGHT, szStr);
 
@@ -904,6 +904,7 @@ int inCTOS_CustComputeAndDispTotal(void)
 					}
 				}
 			}
+                        
 		}
 		else /*ATM*/
 		{
@@ -946,13 +947,15 @@ int inCTOS_CustComputeAndDispTotal(void)
 		{
 			memcpy(srTransRec.szAcquirerFee, szAcquirerFee, 12);
             vdCTOS_FormatAmount("NNN,NNN,NNn.nn", szAcquirerFee, szTotalAmt);
-            sprintf(szStr, "ACQUIRER FEE\n%s %s", strCST.szCurSymbol,szTotalAmt);
+            sprintf(szStr, "ACQUIRER FEE %s %s", strCST.szCurSymbol,szTotalAmt);
+            setLCDPrint(4, DISPLAY_POSITION_LEFT, szStr);
 		}
         else if(atol(szServiceFee) > 0)
         {
 			memcpy(srTransRec.szServiceFee, szServiceFee, 12);
             vdCTOS_FormatAmount("NNN,NNN,NNn.nn", szServiceFee, szTotalAmt);
-            sprintf(szStr, "SERVICE FEE\n%s %s", strCST.szCurSymbol,szTotalAmt);			
+            sprintf(szStr, "SERVICE FEE %s %s", strCST.szCurSymbol,szTotalAmt);
+            setLCDPrint(5, DISPLAY_POSITION_LEFT, szStr);
         }
 		else
 		{
@@ -967,7 +970,8 @@ int inCTOS_CustComputeAndDispTotal(void)
             memset(szStr, 0, sizeof(szStr));
 			memset(szTotalAmt, 0, sizeof(szTotalAmt));
             vdCTOS_FormatAmount("NNN,NNN,NNn.nn", szBillerFee, szTotalAmt);
-            sprintf(szStr, "BILLER FEE\n%s %s", strCST.szCurSymbol,szTotalAmt);			
+            sprintf(szStr, "BILLER FEE %s %s", strCST.szCurSymbol,szTotalAmt);	
+            setLCDPrint(6, DISPLAY_POSITION_LEFT, szStr);
 			
         }
 		else
