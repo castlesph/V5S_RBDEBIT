@@ -1012,7 +1012,14 @@ USHORT ushCTOS_PrintHeader(int page)
     vdDebug_LogPrintf("saturn ushCTOS_PrintHeader-1");
 	vdDebug_LogPrintf("strHDT.szHeaderLogoName[%s]", strHDT.szHeaderLogoName);
 	vdDebug_LogPrintf("fRePrintFlag[%d] fReprintLastSettleFlag[%d]", fRePrintFlag, fReprintLastSettleFlag);
-	
+		//print Logo	
+	if(strlen(strHDT.szHeaderLogoName) > 0)
+		vdCTOSS_PrinterBMPPic(0, 0, strHDT.szHeaderLogoName);
+	else
+		vdCTOSS_PrinterBMPPic(0, 0, "logo.bmp");
+
+	vdDebug_LogPrintf("ushCTOS_PrintHeader-2");
+        
 	//print Logo	
 	//if(strlen(strHDT.szHeaderLogoName) > 0)
 	//	vdCTOSS_PrinterBMPPic(0, 0, strHDT.szHeaderLogoName);
