@@ -583,13 +583,15 @@ if (strTCT.fDemo==FALSE)
         if(srTransPara->shTransResult != TRANS_AUTHORIZED)
             return ST_ERROR; 		
     }
-
+vdDebug_LogPrintf("inProcessLogon ok, srTransRec.byTransType=%d", srTransRec.byTransType);
     if(srTransRec.byTransType == REQUEST_TERMINAL_KEY)
-		vdDisplayMessageBox(1, 8, "", "REQUEST KEY SUCCESSFUL", "", MSG_TYPE_SUCCESS);
+        vduiDisplayStringCenter(8, "REQUEST KEY SUCCESSFUL");
+//		vdDisplayMessageBox(1, 8, "", "REQUEST KEY SUCCESSFUL", "", MSG_TYPE_SUCCESS);
 	else	
-	    vdDisplayMessageBox(1, 8, "", "LOGON SUCCESSFUL", "", MSG_TYPE_SUCCESS);
+            vduiDisplayStringCenter(8, "LOGON SUCCESSFUL");
+//	    vdDisplayMessageBox(1, 8, "", "LOGON SUCCESSFUL", "", MSG_TYPE_SUCCESS);
 	CTOS_Beep();
-	CTOS_Delay(700);
+	CTOS_Delay(700*2);
 	
     return ST_SUCCESS;
 }
