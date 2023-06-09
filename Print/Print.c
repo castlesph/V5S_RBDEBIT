@@ -1134,13 +1134,18 @@ USHORT ushCTOS_PrintBody(int page)
     USHORT result;
     int num,i,inResult;
     unsigned char tucPrint [24*4+1];	
+    char szTotalAmount[d_LINE_SIZE + 1];
     BYTE   EMVtagVal[64];
     USHORT EMVtagLen; 
     short spacestring;
     BYTE   key;
     ULONG ulHH=0L;
     char szAMPM[2+1];
+    int inPrintAcquirerFee=0, inPrintServiceFee=0;
+    long lnTotalAmount=0L;
 	
+	inPrintAcquirerFee=get_env_int("PRINT_ACQ_FEE");
+	inPrintServiceFee=get_env_int("PRINT_SVC_FEE");	
     vdSetGolbFontAttrib(d_FONT_16x16, NORMAL_SIZE, DOUBLE_SIZE, 0, 0);
 	//if(CUSTOMER_COPY_RECEIPT == page)
 	if(page > 0)
@@ -1203,15 +1208,46 @@ USHORT ushCTOS_PrintBody(int page)
 		memset(szStr, ' ', d_LINE_SIZE);
 		memset(szTemp, ' ', d_LINE_SIZE);
 		memset(szTemp1, ' ', d_LINE_SIZE);
-		memset(szTemp3, ' ', d_LINE_SIZE);
+		memset(szTemp3, 0x00, d_LINE_SIZE); //acquirer fee
 		wub_hex_2_str(srTransRec.szTotalAmount, szTemp, AMT_BCD_SIZE);
 		wub_hex_2_str(srTransRec.szBaseAmount, szTemp1, AMT_BCD_SIZE);
-		wub_hex_2_str(srTransRec.szServiceFee, szTemp2, AMT_BCD_SIZE);
+//		wub_hex_2_str(srTransRec.szServiceFee, szTemp2, AMT_BCD_SIZE);
 
         vdSetGolbFontAttrib(d_FONT_16x16, DOUBLE_SIZE, DOUBLE_SIZE, 0, 0);
 
 		#if 1
 		vdPrintFormattedAmount("AMT:", szTemp, 24);
+                
+                lnTotalAmount=atol(szTemp);
+
+		if(inPrintServiceFee == 1)
+		{
+		    if(atol(srTransRec.szServiceFee) > 0)
+		    {
+				vdPrintFormattedAmount("SERVICE FEE:", srTransRec.szServiceFee, 24);
+				lnTotalAmount=lnTotalAmount+atol(srTransRec.szServiceFee);
+		    }
+			else
+				inPrintServiceFee=0;
+		}
+		
+		if(inPrintAcquirerFee == 1)
+		{
+		    if(atol(srTransRec.szAcquirerFee) > 0)
+		    {
+				vdPrintFormattedAmount("ACQUIRER FEE:", srTransRec.szAcquirerFee, 24);
+				lnTotalAmount=lnTotalAmount+atol(srTransRec.szAcquirerFee);
+		    }
+			else
+				inPrintAcquirerFee=0;
+		}
+
+		if(inPrintAcquirerFee == 1 || inPrintServiceFee == 1)
+		{
+		    memset(szTotalAmount, 0x00, sizeof(szTotalAmount));
+		    sprintf(szTotalAmount, "%012ld", lnTotalAmount);
+			vdPrintFormattedAmount("TOTAL:", szTotalAmount, 24);
+		}
 		#else
 		if (srTransRec.byTransType == SALE || srTransRec.byTransType == SALE_OFFLINE || srTransRec.byTransType == VOID || srTransRec.byTransType == CASH_OUT
 			|| srTransRec.byTransType == CASH_IN || srTransRec.byTransType == BILLS_PAYMENT || srTransRec.byTransType == FUND_TRANSFER)
