@@ -16,8 +16,8 @@
 
 
 
-#define PIN_POSITION_X	30
-#define PIN_POSITION_Y	10
+#define PIN_POSITION_X	8
+#define PIN_POSITION_Y	7
 
 
 
