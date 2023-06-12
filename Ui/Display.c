@@ -1110,7 +1110,11 @@ int vdDisplayTrxn(int inSaleType, char *sztrxlogo)
 
 BYTE InputStringUI(BYTE bInputMode,  BYTE bShowAttr, BYTE *pbaStr, USHORT *usStrLen, USHORT usMinLen, USHORT usTimeOutMS, BYTE *szInput)
 {
-     
+    int Bret = 0;
+    short shMaxLen = 20; 
+    Bret = InputString(1, 4, 0x01, 0x02, pbaStr, &shMaxLen, usMinLen, d_INPUT_TIMEOUT);
+    return Bret;
+
 }
 void vdDisplayErrorMsg2(int inColumn, int inRow,  char *msg, char *msg2, int msgType)
 {
@@ -1142,7 +1146,19 @@ USHORT usCTOSS_BackToProgress(BYTE *szDispString)
 }
 void inDisplayLeftRight(int inLine, unsigned char *strLeft, unsigned char *strRight, int inMode)
 {
-    
+	char szStr[48+1]; 
+    int inLength=0, inSize=0;
+	inLength=inMode;	
+	memset(szStr, 0x20, sizeof(szStr));
+	inSize=strlen(strRight);
+    memcpy(&szStr[inLength-inSize], strRight, inSize);
+	inSize=strlen(strLeft);
+    memcpy(szStr, strLeft, strlen(strLeft));
+
+	if ((isCheckTerminalMP200() == d_OK)) 
+		setLCDPrint27(inLine, d_LCD_ALIGNLEFT, szStr);
+	else
+		CTOS_LCDTPrintAligned(inLine, szStr, d_LCD_ALIGNLEFT);
 }
 
 USHORT usCTOSS_EditInfoListViewUI(BYTE *szDispString, BYTE *szOutputBuf)
@@ -1197,8 +1213,36 @@ USHORT usCTOSS_Confirm2(BYTE *szDispString)
 
 USHORT usCTOSS_Confirm3(BYTE *szDispString)
 {
-    vdDebug_LogPrintf("usCTOSS_Confirm");
-    return 0;
+    BYTE key;
+    int result = 0;
+    CTOS_KBDBufFlush(); //cleare key buffer
+    vdDebug_LogPrintf("usCTOSS_Confirm3 -- szDisMsg[%s],",szDispString);
+    CTOS_LCDTPrintXY(1, 8, szDispString);
+    CTOS_TimeOutSet (TIMER_ID_1 , 45*100);
+    while (1) {
+
+        CTOS_KBDHit(&key);
+//        vdDebug_LogPrintf("key=%d", key);
+        if (key == d_KBD_ENTER) {
+            vduiClearBelow(7);
+            result = d_OK;
+            break;
+        } else if ((key == d_KBD_CANCEL)) {
+            result = d_NO;
+            vdSetErrorMessage("USER CANCEL");
+            break;
+        }
+        
+        if(CTOS_TimeOutCheck(TIMER_ID_1 )  == d_YES)
+        {
+            vdSetErrorMessage("TIME OUT");
+            return  d_NO;
+        }
+            
+    }
+    
+    CTOS_KBDBufFlush ();
+    return result;
 }
 
 void DisplayStatusLine(char *szDisplay) 

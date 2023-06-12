@@ -1563,7 +1563,7 @@ int inCTOS_DisplaySettleBatchTotal(BYTE byTransType, BOOL fConfirm)
 	BYTE szTitle[20+1];
 
 	BYTE szCount[40];
-	BYTE szTemp[40];
+	BYTE szTemp[128];
 
 	//USHORT usCashOutCount = 0;
     //ULONG ulCashOutTotalAmount = 0;
@@ -1603,8 +1603,7 @@ int inCTOS_DisplaySettleBatchTotal(BYTE byTransType, BOOL fConfirm)
 	ulCashOutTotalAmount=srAccumRec.stBankTotal[inTranCardType].stHOSTTotal.ulCashOutTotalAmount;
 	ulCashInTotalAmount=srAccumRec.stBankTotal[inTranCardType].stHOSTTotal.ulCashInTotalAmount;
 	ulBillsPaymentTotalAmount=srAccumRec.stBankTotal[inTranCardType].stHOSTTotal.ulBillsPaymentTotalAmount;
-	ulBillsPaymentTotalAmount=srAccumRec.stBankTotal[inTranCardType].stHOSTTotal.ulBillsPaymentTotalAmount;
-	
+	ulFundTransferTotalAmount=srAccumRec.stBankTotal[inTranCardType].stHOSTTotal.ulFundTransferTotalAmount;
     ulTotalAmount = ulCashInTotalAmount+ulCashOutTotalAmount+ulBillsPaymentTotalAmount+ulFundTransferTotalAmount;
 
     usVoidCount = (srAccumRec.stBankTotal[inTranCardType].stHOSTTotal.usVoidSaleCount);
@@ -1724,28 +1723,32 @@ int inCTOS_DisplaySettleBatchTotal(BYTE byTransType, BOOL fConfirm)
 	  strcat(szDispUI, "CASH OUT|"); //trans type
 	  memset(szTemp, 0x00, sizeof(szTemp));
 	  sprintf(szTemp, "%03d|", usCashOutCount);
-	  strcat(szDispUI, szTemp); //trans count
+//	  strcat(szDispUI, szTemp); //trans count
 
       memset(szBuf, 0x00, sizeof(szBuf));
       sprintf(szBuf, "%ld", ulCashOutTotalAmount);
       vdCTOS_FormatAmount("NNN,NNN,NNn.nn", szBuf,szAmtBuf);
 	  memset(szTemp, 0x00, sizeof(szTemp));
-	  sprintf(szTemp, "%s %s|", strCST.szCurSymbol, szAmtBuf);
-	  strcat(szDispUI, szTemp); //trans amount
+//	  sprintf(szTemp, "%s %s|", strCST.szCurSymbol, szAmtBuf);
+          sprintf(szTemp, "CASH OUT:%s %s", strCST.szCurSymbol, szAmtBuf);
+//	  strcat(szDispUI, szTemp); //trans amount
+          CTOS_LCDTPrintXY(1, 3, szTemp);//CASH OUT
       /*end cash out*/
 
 	  /*cash in*/
       strcat(szDispUI, "CASH IN|"); //trans type
       memset(szTemp, 0x00, sizeof(szTemp));
       sprintf(szTemp, "%03d|", usCashInCount);
-      strcat(szDispUI, szTemp); //trans count
+//      strcat(szDispUI, szTemp); //trans count
       
       memset(szBuf, 0x00, sizeof(szBuf));
       sprintf(szBuf, "%ld", ulCashInTotalAmount);
       vdCTOS_FormatAmount("NNN,NNN,NNn.nn", szBuf,szAmtBuf);
       memset(szTemp, 0x00, sizeof(szTemp));
-      sprintf(szTemp, "%s %s|", strCST.szCurSymbol, szAmtBuf);
-      strcat(szDispUI, szTemp); //trans amount
+//      sprintf(szTemp, "%s %s|", strCST.szCurSymbol, szAmtBuf);
+      sprintf(szTemp, "CASH IN:%s %s", strCST.szCurSymbol, szAmtBuf);
+//      strcat(szDispUI, szTemp); //trans amount
+      CTOS_LCDTPrintXY(1, 4, szTemp);//CASH IN
       /*end cash in*/
 
 	  
@@ -1753,42 +1756,53 @@ int inCTOS_DisplaySettleBatchTotal(BYTE byTransType, BOOL fConfirm)
       strcat(szDispUI, "BILLS PAYMENT|"); //trans type
       memset(szTemp, 0x00, sizeof(szTemp));
       sprintf(szTemp, "%03d|", usBillsPaymentCount);
-      strcat(szDispUI, szTemp); //trans count
+//      strcat(szDispUI, szTemp); //trans count
       
       memset(szBuf, 0x00, sizeof(szBuf));
       sprintf(szBuf, "%ld", ulBillsPaymentTotalAmount);
       vdCTOS_FormatAmount("NNN,NNN,NNn.nn", szBuf,szAmtBuf);
       memset(szTemp, 0x00, sizeof(szTemp));
-      sprintf(szTemp, "%s %s|", strCST.szCurSymbol, szAmtBuf);
-      strcat(szDispUI, szTemp); //trans amount
+//      sprintf(szTemp, "%s %s|", strCST.szCurSymbol, szAmtBuf);
+      sprintf(szTemp, "BILLS PAY:%s %s", strCST.szCurSymbol, szAmtBuf);
+//      strcat(szDispUI, szTemp); //trans amount
+      CTOS_LCDTPrintXY(1, 5, szTemp);//bils payment
+      vdDebug_LogPrintf("bils payment[%s]",szTemp);
       /*end bils payment*/
-
+      
+vdDebug_LogPrintf("fund transfer[%d],[%ld]",usFundTransferCount,ulFundTransferTotalAmount);
 	  /*fund transfer*/
-      strcat(szDispUI, "TRANSFER|"); //trans type
+//      strcat(szDispUI, "TRANSFER|"); //trans type
       memset(szTemp, 0x00, sizeof(szTemp));
       sprintf(szTemp, "%03d|", usFundTransferCount);
-      strcat(szDispUI, szTemp); //trans count
+//      strcat(szDispUI, szTemp); //trans count
       
       memset(szBuf, 0x00, sizeof(szBuf));
       sprintf(szBuf, "%ld", ulFundTransferTotalAmount);
       vdCTOS_FormatAmount("NNN,NNN,NNn.nn", szBuf,szAmtBuf);
       memset(szTemp, 0x00, sizeof(szTemp));
-      sprintf(szTemp, "%s %s|", strCST.szCurSymbol, szAmtBuf);
-      strcat(szDispUI, szTemp); //trans amount
+//      sprintf(szTemp, "%s %s|", strCST.szCurSymbol, szAmtBuf);
+      sprintf(szTemp, "FUND TRS:%s %s", strCST.szCurSymbol, szAmtBuf);
+//      strcat(szDispUI, szTemp); //trans amount
+      CTOS_LCDTPrintXY(1, 6, szTemp);//fund transfer
+      vdDebug_LogPrintf("fund transfer[%s]",szTemp);
       /*end fund transfer*/
 
      /*totals*/
+      vdDebug_LogPrintf("TOTAL[%d],[%ld]",usTotalCount,ulTotalAmount);
      strcat(szDispUI, "TOTAL|"); //trans type
      memset(szTemp, 0x00, sizeof(szTemp));
      sprintf(szTemp, "%03d|", usTotalCount);
-     strcat(szDispUI, szTemp); //trans count
+//     strcat(szDispUI, szTemp); //trans count
      
      memset(szBuf, 0x00, sizeof(szBuf));
      sprintf(szBuf, "%ld", ulTotalAmount);
      vdCTOS_FormatAmount("NNN,NNN,NNn.nn", szBuf,szAmtBuf);
      memset(szTemp, 0x00, sizeof(szTemp));
-     sprintf(szTemp, "%s %s|", strCST.szCurSymbol, szAmtBuf);
-     strcat(szDispUI, szTemp); //trans amoun	  
+//     sprintf(szTemp, "%s %s|", strCST.szCurSymbol, szAmtBuf);
+     sprintf(szTemp, "TOTAL:%s %s", strCST.szCurSymbol, szAmtBuf);
+//     strcat(szDispUI, szTemp); //trans amount
+     CTOS_LCDTPrintXY(1, 7, szTemp);//totals
+      vdDebug_LogPrintf("TOTAL[%s]",szTemp);
 	 /*end totals*/
 	 
      memset(szDisplayBuf0,0x00,sizeof(szDisplayBuf0));
@@ -1808,45 +1822,23 @@ int inCTOS_DisplaySettleBatchTotal(BYTE byTransType, BOOL fConfirm)
 	   else
 	   #endif
 	   {
-	   	
-    if(srTransRec,byTransType==SETTLE)
-        key = usCTOSS_Confirm(szDispUI);
-    else
-        key = usCTOSS_Confirm3(szDispUI);
-			
-			if (key == d_USER_CANCEL) /*timeout and key cancel*/
-			{
-					 
-				memset(szTitle, 0x00, sizeof(szTitle));
-				szGetTransTitle(srTransRec.byTransType, szTitle);
+                memset(szDispUI, 0x00, sizeof(szDispUI));
+                strcat(szDispUI, "PLS ENTER TO PROCEED");
+                if(srTransRec,byTransType==SETTLE)
+                    key = usCTOSS_Confirm(szDispUI);
+                else
+                    key = usCTOSS_Confirm3(szDispUI);
+                vdDebug_LogPrintf("key=%d", key);
+                if (key != d_OK)
+                {
+                    CTOS_Beep();
+                    CTOS_Delay(1500);
+                    vdDisplayMessageBox(1, 8, "", "TXN CANCEL", "", MSG_TYPE_INFO);
+                    return d_NO;
 
-				memset(szDispUI, 0x00, sizeof(szDispUI));
-				strcpy(szDispUI, szTitle);
-				strcat(szDispUI, "|");
-				strcat(szDispUI, "USER CANCEL");
-				//usCTOSS_LCDDisplay(szDispUI);
-				vdDisplayMessageBox(1, 8, "", "USER CANCEL", "", MSG_TYPE_INFO);
-				CTOS_Beep();
-				CTOS_Delay(1000);
-				return d_NO;
-			}
-
-			// sidumili: timeout display message
-			if (key == d_TIMEOUT)
-			{
-				vdDisplayMessageBox(1, 8, "", "TIME OUT", "", MSG_TYPE_WARNING);
-				CTOS_Beep();
-		        CTOS_Delay(1000);
-				return d_NO;
-			}
+                }
 				
-			if (key != d_OK)
-				return d_NO;
-				
-			return d_OK;
 	   } 				  
-
-
 
 #endif
 		
