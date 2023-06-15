@@ -2192,7 +2192,7 @@ void vdCTOS_PrintSummaryReport()
 	memset(szLogoPath, 0x00, sizeof(szLogoPath));	
 	
     sprintf(szLogoPath, "%s%s", LOCAL_PATH, strHDT.szHeaderLogoName);
-	vdCTOSS_PrinterBMPPicEx(0, 0, szLogoPath);
+//	vdCTOSS_PrinterBMPPicEx(0, 0, szLogoPath);
 	
 	ushCTOS_PrintHeader(0);	
     
@@ -2323,7 +2323,7 @@ void vdCTOS_PrintSummaryReport()
 	//print space one line
 	vdLineFeed(FALSE);
 	
-	//vdCTOSS_PrinterEnd(); // Commented to support print confirmation -- sidumili
+	vdCTOSS_PrinterEnd(); // Commented to support print confirmation -- sidumili
 
 	// Capture report -- sidumili
 	vdDebug_LogPrintf("Capturing erm report...");
@@ -2349,9 +2349,9 @@ void vdCTOS_PrintSummaryReport()
 	else	*/
 	{
 		//usCTOSS_LCDDisplay("SUMMARY REPORT|PRINTING...");
-		vdDisplayMessageBox(1, 8, "", "PRINTING...", "", MSG_TYPE_PRINT);
-		vdCTOSS_PrinterBMPPicEx(0, 0, "/home/ap/pub/Print_BMP.bmp");
-		vdCTOSS_PrinterEnd();
+//		vdDisplayMessageBox(1, 8, "", "PRINTING...", "", MSG_TYPE_PRINT);
+//		vdCTOSS_PrinterBMPPicEx(0, 0, "/home/ap/pub/Print_BMP.bmp");
+//		vdCTOSS_PrinterEnd();
 	}
 }
 
@@ -3144,7 +3144,7 @@ int inCTOS_PrintSettleReport(void)
 
 	memset(szLogoPath, 0x00, sizeof(szLogoPath));	
 	sprintf(szLogoPath, "%s%s", LOCAL_PATH, strHDT.szHeaderLogoName);
-	vdCTOSS_PrinterBMPPicEx(0, 0, szLogoPath);
+//	vdCTOSS_PrinterBMPPicEx(0, 0, szLogoPath);
 		
 	ushCTOS_PrintHeader(0);	
     
@@ -3304,7 +3304,7 @@ USHORT ushCTOS_printBatchRecordHeader(void)
 	memset(szLogoPath, 0x00, sizeof(szLogoPath));	
 
     sprintf(szLogoPath, "%s%s", LOCAL_PATH, strHDT.szHeaderLogoName);
-	vdCTOSS_PrinterBMPPicEx(0, 0, szLogoPath);
+//	vdCTOSS_PrinterBMPPicEx(0, 0, szLogoPath);
 	
     ushCTOS_PrintHeader(0);	
     
@@ -6822,7 +6822,7 @@ USHORT ushCTOS_printBatchRecordHeaderCashMo(void)
 	memset(szLogoPath, 0x00, sizeof(szLogoPath));	
 
     sprintf(szLogoPath, "%s%s", LOCAL_PATH, strHDT.szHeaderLogoName);
-	vdCTOSS_PrinterBMPPicEx(0, 0, szLogoPath);
+//	vdCTOSS_PrinterBMPPicEx(0, 0, szLogoPath);
 	
     ushCTOS_PrintHeader(0);	
     

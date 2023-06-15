@@ -3934,7 +3934,7 @@ int inCTOS_RequestTerminalKeyFlowProcess(void)
 	vdDebug_LogPrintf("inCTOS_RequestTerminalKeyFlowProcess");
 	
 	vdCTOS_SetTransType(REQUEST_TERMINAL_KEY);
-
+vdDispTransTitle(REQUEST_TERMINAL_KEY);
     if(get_env_int("BANCNET_TESTKEY") == 1)
 	    vdSetDummyMKey();
 	

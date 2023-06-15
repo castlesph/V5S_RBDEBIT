@@ -528,8 +528,8 @@ int inProcessLogon(void)
 	else	
     	setLCDPrint(8, DISPLAY_POSITION_LEFT, "Processing...        ");  
 	#else
-		//vdCTOS_DispStatusMessage("PROCESSING...");
-		vdDisplayMessageStatusBox(1, 8, "PROCESSING", MSG_PLS_WAIT, MSG_TYPE_PROCESS);
+		vdCTOS_DispStatusMessage("PROCESSING...");
+		//vdDisplayMessageStatusBox(1, 8, "PROCESSING", MSG_PLS_WAIT, MSG_TYPE_PROCESS);
 	#endif
 	
 	srTransPara->byOffline = CN_FALSE;
@@ -585,7 +585,7 @@ if (strTCT.fDemo==FALSE)
     }
 vdDebug_LogPrintf("inProcessLogon ok, srTransRec.byTransType=%d", srTransRec.byTransType);
     if(srTransRec.byTransType == REQUEST_TERMINAL_KEY)
-        vduiDisplayStringCenter(8, "REQUEST KEY SUCCESSFUL");
+        vduiDisplayStringCenter(8, "REQ KEY SUCCESSFUL");
 //		vdDisplayMessageBox(1, 8, "", "REQUEST KEY SUCCESSFUL", "", MSG_TYPE_SUCCESS);
 	else	
             vduiDisplayStringCenter(8, "LOGON SUCCESSFUL");
