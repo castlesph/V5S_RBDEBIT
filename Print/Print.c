@@ -2532,7 +2532,7 @@ usCTOSS_LCDDisplay(szDisMsg);
 
     vdLineFeed(FALSE);
 	
-    //vdCTOSS_PrinterEnd(); // Commented to support print confirmation -- sidumili
+    vdCTOSS_PrinterEnd(); // Commented to support print confirmation -- sidumili
 	
 	// Capture report -- sidumili		
 	vdDebug_LogPrintf("Capturing erm report...");
