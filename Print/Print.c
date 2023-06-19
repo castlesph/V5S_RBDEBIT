@@ -5252,8 +5252,8 @@ int inPrintISOPacket(unsigned char *pucTitle,unsigned char *pucMessage, int inLe
     if (inLen <= 0)
         return(ST_SUCCESS);
 
-	//if (isCheckTerminalMP200() != d_OK)
-	//	vdCTOSS_PrinterStart(100);
+	if (isCheckTerminalMP200() != d_OK)
+		vdCTOSS_PrinterStart(100);
 	
     CTOS_PrinterSetHeatLevel(strTCT.inPrinterHeatLevel);
 	//adnroid-removed

@@ -239,7 +239,8 @@ int inGetIPPPin(void)
             else
             {
                 sprintf(str, "%s=%04X", strDCT.szDisplayProcessing, ret);
-                vdDisplayErrorMsg(1, 8, str);
+//                vdDisplayErrorMsg(1, 8, str);
+                vdDisplayErrorMsg(1, 8, "CANCEL");
                 return ret;
             }
 	}
