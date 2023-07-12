@@ -3210,7 +3210,7 @@ int inPackIsoFunc18(TRANS_DATA_TABLE *srTransPara, unsigned char* uszSendData)
 int inPackIsoFunc22(TRANS_DATA_TABLE *srTransPara, unsigned char* uszSendData)
 {
     char szTempEnterMode[5];
-    vdMyEZLib_LogPrintf("**inPackIsoFunc22 START**");
+    vdMyEZLib_LogPrintf("**inPackIsoFunc22 START,srTransPara->byEntryMode=%d**", srTransPara->byEntryMode);
     
     inDataCnt = 0;
     
@@ -3222,7 +3222,8 @@ int inPackIsoFunc22(TRANS_DATA_TABLE *srTransPara, unsigned char* uszSendData)
         //if(srTransPara->byPINEntryCapability == 0)
             //strcpy(szTempEnterMode,"0052");
         //else
-        strcpy(szTempEnterMode,"0051");			
+//        strcpy(szTempEnterMode,"0051");	
+        strcpy(szTempEnterMode,"0051");	
     }
     else if (srTransPara->byEntryMode == CARD_ENTRY_FALLBACK)
     {

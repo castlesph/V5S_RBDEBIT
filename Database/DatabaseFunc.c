@@ -208,6 +208,7 @@ int inCPTRead(int inSeekCnt)
 
                         /*inIPHeader*/
 			strCPT.inIPHeader = sqlite3_column_int(stmt, inStmtSeq +=1 );
+                        vdDebug_LogPrintf("strCPT.inIPHeader[%d]", strCPT.inIPHeader);
 			/*fCommBackUpMode*/
 			strCPT.fCommBackUpMode =fGetBoolean((BYTE *) sqlite3_column_text(stmt,inStmtSeq +=1 ));
 		
@@ -5685,7 +5686,8 @@ int inMultiAP_Database_BatchRead(TRANS_DATA_TABLE *transData)
 			transData->usTrack3Len = sqlite3_column_int(stmt,inStmtSeq +=1 );
 			memcpy(transData->szTrack1Data, sqlite3_column_blob(stmt,inStmtSeq +=1 ), 86);						
 			memcpy(transData->szTrack2Data, sqlite3_column_blob(stmt,inStmtSeq +=1 ), 42);						
-			memcpy(transData->szTrack3Data, sqlite3_column_blob(stmt,inStmtSeq +=1 ), 65);		
+			memcpy(transData->szTrack3Data, sqlite3_column_blob(stmt,inStmtSeq +=1 ), 65);	
+                        DebugAddHEX("szTrack2Data", transData->szTrack2Data, 42);	
 			transData->usChipDataLen = sqlite3_column_int(stmt,inStmtSeq +=1 );
 			memcpy(transData->baChipData, sqlite3_column_blob(stmt,inStmtSeq +=1 ), 1024);
 			transData->usAdditionalDataLen = sqlite3_column_int(stmt,inStmtSeq +=1 );

@@ -2383,6 +2383,25 @@ void put_env_char(char *tag, char *value)
 	vdDebug_LogPrintf("put_env_char [%s]=[%s] ret[%d]", tag, value, ret);
 }
 
+int get_env(char *tag, char *value, int len)
+{
+	int inRet = 0;
+	inRet = inCTOSS_GetEnvDB (tag, value);
+
+	vdDebug_LogPrintf("get_env tag[%s] value[%s] Ret[%d]", tag, value, inRet);
+	return inRet;
+}
+
+int put_env(char *tag, char *value, int len)
+{
+	int inRet = 0;
+	
+	inRet = inCTOSS_PutEnvDB (tag, value);
+
+	vdDebug_LogPrintf("put_env tag[%s] value[%s] Ret[%d]", tag, value, inRet);
+	return inRet;
+}
+
 int get_env_int (char *tag)
 {
 	int     ret = -1;
@@ -2410,4 +2429,36 @@ void put_env_int(char *tag, int value)
     ret = inCTOSS_PutEnvDB (tag, buf);
 
 	vdDebug_LogPrintf("put_env_int [%s]=[%d] ret[%d]", tag, value, ret);
+}
+
+
+
+void vdCTOSS_ClearTouchPanelTest(void)
+{
+	BYTE str[256],size = 5;
+	ULONG rb;
+	BYTE count = 0;
+
+	int pen_up = 0;
+	int pen_down = 0;
+	int bXpen_up = 0, bXpen_down = 0;
+	int bXCoordinate = 0, bYCoordinate = 0;
+	int temp_iX = 0,temp_iY = 0;
+	USHORT ret;
+    BYTE key;
+
+
+	do{
+		ret = CTOS_VirtualFunctionKeyHit(&key);
+		vdDebug_LogPrintf("ClearTouchPanelTest CTOS_VirtualFunctionKeyHit.key=[%d]",key);
+		vdDebug_LogPrintf("d_KBD_INVALID=[%d]",d_KBD_INVALID);
+		if (key == d_KBD_INVALID)
+		{
+			CTOS_KBDHit(&key);
+			break;
+		}
+
+	}while(key != d_KBD_INVALID);
+	
+	
 }

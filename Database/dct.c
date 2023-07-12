@@ -59,7 +59,8 @@ int inDCTRead(int inHDTid, int inMITid)
              /* inMaxPINDigit*/
              strDCT.inMaxPINDigit = sqlite3_column_int(stmt, inStmtSeq+=1);
              /*szPINKey*/
-             memcpy(strDCT.szPINKey, sqlite3_column_blob(stmt,inStmtSeq +=1 ), IPP_TDES_KEY_SIZE);					
+             memcpy(strDCT.szPINKey, sqlite3_column_blob(stmt,inStmtSeq +=1 ), IPP_TDES_KEY_SIZE);	
+             DebugAddHEX("read enc szPINKey", strDCT.szPINKey, 16);
              /*szMACKey*/
              memcpy(strDCT.szMACKey, sqlite3_column_blob(stmt,inStmtSeq +=1 ), IPP_TDES_KEY_SIZE);
              /*usKeySet*/
@@ -110,6 +111,7 @@ int inDCTSave(int inHDTid, int inMITid)
 	result = sqlite3_bind_int(stmt, inStmtSeq +=1, strDCT.inMaxPINDigit);
 	/* szPINKey*/
 	result = sqlite3_bind_blob(stmt, inStmtSeq +=1, strDCT.szPINKey, IPP_TDES_KEY_SIZE, SQLITE_STATIC);
+        DebugAddHEX("szPINKey", strDCT.szPINKey, 16);
 	/* szMACKey*/
 	result = sqlite3_bind_blob(stmt, inStmtSeq +=1, strDCT.szMACKey, IPP_TDES_KEY_SIZE, SQLITE_STATIC);
 	/* usKeySet*/
